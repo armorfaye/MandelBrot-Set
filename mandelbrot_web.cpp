@@ -126,10 +126,6 @@ EMSCRIPTEN_BINDINGS(my_module) {
 }
 #else
 int main() {
-	auto thing = genPixels(400, 0.0, 0.0, 1.0, 1.0);
-	for(Color i:thing){
-		std::cout << i.r << " " << i.g << " " << i.b << "\n"; 
-	}
 	return 0;
 }
 #endif

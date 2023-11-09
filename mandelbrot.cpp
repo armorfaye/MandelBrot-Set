@@ -1,4 +1,3 @@
-#include <gmpxx.h>
 #include <vector>
 #include <cmath>
 #include <iostream>
@@ -6,7 +5,6 @@
 #include <png.h>
 #include <cstdlib>
 #include <cstdio>
-#include <emscripten/bind.h>
 
 const int WIDTH = 4096;
 int HEIGHT;
@@ -26,26 +24,21 @@ void generateColorPalette() {
     const double center = 128;    // Max value for color component / 2
 
     for (int i = 0; i < H; ++i) {
-        palette[i].r = static_cast<uint8_t>(std::sin(frequency * i + 0) * amplitude + center);
-        palette[i].g = static_cast<uint8_t>(std::sin(frequency * i + 4 * M_PI / 3) * amplitude + center);
-        palette[i].b = static_cast<uint8_t>(std::sin(frequency * i + 2 * M_PI / 3) * amplitude + center);
+        palette[i].g = static_cast<int>(std::sin(frequency * i + 0) * amplitude + center);
+        palette[i].r = static_cast<int>(std::sin(frequency * i + 2 * M_PI / 3) * amplitude + center);
+        palette[i].b = static_cast<int>(std::sin(frequency * i + 4 * M_PI / 3) * amplitude + center);
     }
 }
 
-int getIterations(const mpf_class &real, const mpf_class &imag) {
+int getIterations(double real, double imag) {
     int iteration = 0;
-    mpf_class x = 0;
-    mpf_class y = 0;
-    mpf_class x2 = 0;
-    mpf_class y2 = 0;
-	mpf_class lastX = 0;
-	mpf_class lastY = 0; 
-	//mpf_class x1 = 0, y1 = 0; // Variables for Brent's algorithm
-    //int lam = 0;
-    //int power = 1;
-    //nt steps_taken = 0;
-
-	int period = 0; 
+    double x = 0;
+    double y = 0;
+    double x2 = 0;
+    double y2 = 0;
+    double lastX = 0;
+    double lastY = 0; 
+    int period = 0; 
 
     while(x2 + y2 <= 4 && iteration < MAX_ITER) {
         y = 2 * x * y + imag;
@@ -53,31 +46,15 @@ int getIterations(const mpf_class &real, const mpf_class &imag) {
         x2 = x * x;
         y2 = y * y;
 
-        /*
-		if (iteration == power) {
-            x1 = x;
-            y1 = y;
-            power *= 2;
-            lam = 0;
-            steps_taken = 0;
-        }
-
-		if ((x == x1 && y == y1) && steps_taken > 0) {
-            // A cycle is detected, we can assume the point is in the Mandelbrot set
+        if(x == lastX && y == lastY){
             return MAX_ITER;
         }
-        steps_taken++;
-        lam++; */
 
-		if(x == lastX && y ==lastY){
-			return MAX_ITER;
-		}
-
-		while(++period > 9){
-			lastX = x;
-			lastY = y;
-			period = 0; 
-		}
+        while(++period > 9){
+            lastX = x;
+            lastY = y;
+            period = 0; 
+        }
 
         iteration++;
     }
@@ -91,9 +68,9 @@ int getIterations(const mpf_class &real, const mpf_class &imag) {
             iteration++;
         }
 
-        mpf_class modulus = sqrt(x2 + y2);
-        mpf_class mu = iteration - log(log(modulus.get_d())) / log(2.0);
-        iteration = static_cast<int>(mu.get_d());
+        double modulus = sqrt(x2 + y2);
+        double mu = iteration - log(log(modulus)) / log(2.0);
+        iteration = static_cast<int>(mu);
     }
 
     return iteration;
@@ -161,11 +138,11 @@ void create_png(const char *filename, const int &width, const int &height, std::
 }
 
 
-void computeMandelbrot(std::vector<std::vector<int> > &results, const mpf_class &start_real, const mpf_class &start_imag, const mpf_class &end_real, const mpf_class &end_imag, int y_start, int y_end) {
+void computeMandelbrot(std::vector<std::vector<int> > &results, const double &start_real, const double &start_imag, const double &end_real, const double &end_imag, int y_start, int y_end) {
     for (int x = 0; x < WIDTH; x++) {
         for (int y = y_start; y < y_end; y++) {
-            mpf_class real = start_real + x * ((end_real - start_real) / WIDTH);
-            mpf_class imag = end_imag - y * ((end_imag - start_imag) / HEIGHT);
+            double real = start_real + x * ((end_real - start_real) / WIDTH);
+            double imag = end_imag - y * ((end_imag - start_imag) / HEIGHT);
             results[x][y] = getIterations(real, imag);
         }
     }
@@ -173,14 +150,14 @@ void computeMandelbrot(std::vector<std::vector<int> > &results, const mpf_class 
 
 
 int main(int argc, char *argv[]) {
-	mpf_class start_real(argv[1]);
-	mpf_class start_imag(argv[2]);
-	mpf_class end_real(argv[3]);
-	mpf_class end_imag(argv[4]);
+	double start_real = strtod(argv[1], nullptr);
+	double start_imag = strtod(argv[2], nullptr);
+	double end_real = strtod(argv[3], nullptr);
+	double end_imag = strtod(argv[4], nullptr);
 
-	mpf_class height = (WIDTH*(end_imag - start_imag))/(end_real - start_real);
+	double height = (WIDTH*(end_imag - start_imag))/(end_real - start_real);
 
-	HEIGHT = (int)height.get_d();
+	HEIGHT = (int)height; 
 
 	std::vector<std::vector<int> > results(WIDTH, std::vector<int>(HEIGHT, 0));
 
