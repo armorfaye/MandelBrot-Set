@@ -1,0 +1,9 @@
+{
+	"files.associations": {
+		"cstdlib": "cpp",
+		"thread": "cpp",
+		"cstdio": "cpp",
+		"vector": "cpp",
+		"ios": "cpp"
+	}
+}

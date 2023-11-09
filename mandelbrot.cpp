@@ -6,6 +6,7 @@
 #include <png.h>
 #include <cstdlib>
 #include <cstdio>
+#include <emscripten/bind.h>
 
 const int WIDTH = 4096;
 int HEIGHT;
