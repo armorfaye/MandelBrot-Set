@@ -1,1 +1,1 @@
-em++ mandelbrot_double.cpp -o mandelbrot.js  -L/opt/homebrew/lib -I/opt/homebrew/include -lembind -O3 -sALLOW_MEMORY_GROWTH -sASSERTIONS
+em++ mandelbrot_web.cpp -o mandelbrot.js  -L/opt/homebrew/lib -I/opt/homebrew/include -lembind -O3 -sALLOW_MEMORY_GROWTH -sASSERTIONS
