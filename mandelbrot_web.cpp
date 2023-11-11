@@ -3,6 +3,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <cstdio>
+#include <emscripten/bind.h>
 
 const int MAX_ITER = 1000;
 const int H = 500; 
@@ -113,8 +114,6 @@ std::vector<Color> genPixels(int WIDTH, double start_real, double start_imag, do
     return pixels;
 }
 
-#ifdef __EMSCRIPTEN__
-#include <emscripten/bind.h>
 using namespace emscripten;
 EMSCRIPTEN_BINDINGS(my_module) {
 	value_object<Color>("Color")
@@ -124,8 +123,3 @@ EMSCRIPTEN_BINDINGS(my_module) {
     function("genPixels", &genPixels);
 	register_vector<Color>("ColorVector");
 }
-#else
-int main() {
-	return 0;
-}
-#endif
